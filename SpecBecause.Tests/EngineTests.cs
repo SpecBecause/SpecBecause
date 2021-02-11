@@ -195,6 +195,25 @@ namespace SpecBecause.Tests
         }
 
         [Fact]
+        public void When_calling_BecauseThrows_and_an_unexpected_exception_is_thrown()
+        {
+            var engineUnderTest = new Engine();
+            var unexpectedException = new Exception(Guid.NewGuid().ToString());
+
+            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.BecauseThrows<InvalidOperationException>(() => throw unexpectedException));
+
+            Engine.It("should catch and return the thrown exception", () =>
+            {
+                exception.ShouldSatisfyAllConditions(x =>
+                {
+                    exception.ShouldNotBeSameAs(unexpectedException);
+                    exception.Message.ShouldBe("Act threw an unexpected exception.");
+                    exception.InnerException.ShouldBeSameAs(unexpectedException);
+                });
+            });
+        }
+
+        [Fact]
         public void When_calling_BecauseThrows_and_no_exception_is_thrown()
         {
             var engineUnderTest = new Engine();
@@ -251,7 +270,7 @@ namespace SpecBecause.Tests
         }
 
         [Fact]
-        public void When_disposing_of_Engine_and_an_exception_has_been_thrown()
+        public void When_disposing_of_Engine_and_an_exception_has_been_captured()
         {
             var engineUnderTest = new Engine();
 
@@ -279,6 +298,29 @@ namespace SpecBecause.Tests
             {
                 throw new Exception("Failed to throw exception on Dispose.");
             }
+        }
+
+        [Fact]
+        public void When_disposing_of_Engine_and_multiple_exceptions_have_been_captured()
+        {
+            var engineUnderTest = new Engine();
+
+            var expectedException1 = new Exception(Guid.NewGuid().ToString());
+            var expectedException2 = new Exception(Guid.NewGuid().ToString());
+            engineUnderTest.It(Guid.NewGuid().ToString(), () => throw expectedException1);
+            engineUnderTest.It(Guid.NewGuid().ToString(), () => throw expectedException2);
+
+            var exception = Engine.BecauseThrows<AggregateException>(() => engineUnderTest.Dispose());
+
+            Engine.It("should aggregate and throw all captured exceptions", () =>
+            {
+                exception.ShouldSatisfyAllConditions(x =>
+                {
+                    x.InnerExceptions.Count.ShouldBe(2);
+                    x.InnerExceptions.ShouldContain(expectedException1);
+                    x.InnerExceptions.ShouldContain(expectedException2);
+                });
+            });
         }
 
         public void Dispose()

@@ -20,6 +20,10 @@ namespace SpecBecause
             {
                 return ex;
             }
+            catch (Exception ex)
+            {
+                throw new Exception("Act threw an unexpected exception.", ex);
+            }
 
             return null;
         }
@@ -37,8 +41,14 @@ namespace SpecBecause
 
         public void Dispose()
         {
-            if (capturedExceptions.Any())
+            if (capturedExceptions.Count == 1)
+            {
                 throw capturedExceptions[0];
+            }
+            else if (capturedExceptions.Count > 1)
+            {
+                throw new AggregateException(capturedExceptions);
+            }
         }
     }
 }
