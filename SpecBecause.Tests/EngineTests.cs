@@ -72,6 +72,29 @@ namespace SpecBecause.Tests
                     x.Name.ShouldBe("Void");
                 });
 
+            var itMethod = engineType.GetMethod("It");
+            itMethod.ShouldNotBeNull();
+
+            var itParameters = itMethod.GetParameters();
+            itParameters.Length.ShouldBe(2);
+            itParameters.Single(x => x.Position == 0)
+                .ShouldSatisfyAllConditions(x =>
+                {
+                    x.Name.ShouldBe("assertionMessage");
+                    x.ParameterType.ShouldBe(typeof(string));
+                });
+            itParameters.Single(x => x.Position == 1)
+                .ShouldSatisfyAllConditions(x =>
+                {
+                    x.Name.ShouldBe("assertion");
+                    x.ParameterType.Name.ShouldBe("Action");
+                });
+
+            itMethod.ReturnType
+                .ShouldSatisfyAllConditions(x =>
+                {
+                    x.Name.ShouldBe("Void");
+                });
         }
 
         [Fact]
@@ -103,6 +126,33 @@ namespace SpecBecause.Tests
             });
 
             result.ShouldBeSameAs(expectedResult);
+        }
+
+        [Fact]
+        public void When_calling_It()
+        {
+            var engineUnderTest = new Engine();
+            var callCount = 0;
+
+            Engine.Because(() =>
+            {
+                engineUnderTest.It(Guid.NewGuid().ToString(), () =>
+                {
+                    callCount++;
+                });
+            });
+
+            var itExecuted = false;
+            Engine.It("should execute the assertion action", () =>
+            {
+                callCount.ShouldBe(1);
+                itExecuted = true;
+            });
+
+            if (!itExecuted)
+            {
+                throw new Exception($"{nameof(Engine)}.{nameof(Engine.It)} never executed.");
+            }
         }
     }
 }
