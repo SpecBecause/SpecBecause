@@ -47,14 +47,15 @@ namespace SpecBecause.Tests
 
             Engine.It("should have a generic Because method", () =>
             {
+                const string becauseGenericTypeName = "TResult";
                 var genericBecauseMethod = becauseMethods.Single(x => x.IsGenericMethod);
 
                 genericBecauseMethod.GetGenericArguments()
                     .ShouldHaveSingleItem()
                     .ShouldSatisfyAllConditions(x =>
                     {
-                        x.Name.ShouldBe("TResult");
-                        x.BaseType.ShouldBe(typeof(object));
+                        x.Name.ShouldBe(becauseGenericTypeName);
+                        x.GetGenericParameterConstraints().ShouldBeEmpty();
                     });
 
                 genericBecauseMethod.GetParameters()
@@ -67,16 +68,50 @@ namespace SpecBecause.Tests
                             .ShouldHaveSingleItem()
                             .ShouldSatisfyAllConditions(y =>
                             {
-                                y.Name.ShouldBe("TResult");
-                                y.BaseType.ShouldBe(typeof(object));
+                                y.Name.ShouldBe(becauseGenericTypeName);
+                                y.GetGenericParameterConstraints().ShouldBeEmpty();
                             });
                     });
 
                 genericBecauseMethod.ReturnType
                     .ShouldSatisfyAllConditions(x =>
                     {
-                        x.Name.ShouldBe("TResult");
-                        x.BaseType.ShouldBe(typeof(object));
+                        x.Name.ShouldBe(becauseGenericTypeName);
+                        x.GetGenericParameterConstraints().ShouldBeEmpty();
+                    });
+            });
+
+            Engine.It("should have a BecauseThrows method", () =>
+            {
+                const string becauseThrowsGenericTypeName = "TException";
+                var becauseThrowsMethod = engineType.GetMethod("BecauseThrows");
+                becauseThrowsMethod.ShouldNotBeNull();
+
+                becauseThrowsMethod.GetGenericArguments()
+                    .ShouldHaveSingleItem()
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe(becauseThrowsGenericTypeName);
+                        x.GetGenericParameterConstraints()
+                            .ShouldHaveSingleItem()
+                            .ShouldBe(typeof(Exception));
+                    });
+
+                becauseThrowsMethod.GetParameters()
+                    .ShouldHaveSingleItem()
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe("act");
+                        x.ParameterType.Name.ShouldBe("Action");
+                    });
+
+                becauseThrowsMethod.ReturnType
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe(becauseThrowsGenericTypeName);
+                        x.GetGenericParameterConstraints()
+                            .ShouldHaveSingleItem()
+                            .ShouldBe(typeof(Exception));
                     });
             });
 
@@ -142,6 +177,33 @@ namespace SpecBecause.Tests
             Engine.It("should execute the act Func", () =>
             {
                 result.ShouldBeSameAs(expectedResult);
+            });
+        }
+
+        [Fact]
+        public void When_calling_BecauseThrows_and_an_exception_is_thrown()
+        {
+            var engineUnderTest = new Engine();
+            var expectedException = new InvalidOperationException(Guid.NewGuid().ToString());
+
+            var exception = Engine.Because(() => engineUnderTest.BecauseThrows<InvalidOperationException>(() => throw expectedException));
+
+            Engine.It("should catch and return the thrown exception", () =>
+            {
+                exception.ShouldBeSameAs(expectedException);
+            });
+        }
+
+        [Fact]
+        public void When_calling_BecauseThrows_and_no_exception_is_thrown()
+        {
+            var engineUnderTest = new Engine();
+
+            var exception = Engine.Because(() => engineUnderTest.BecauseThrows<InvalidOperationException>(() => { }));
+
+            Engine.It("should return null", () =>
+            {
+                exception.ShouldBeNull();
             });
         }
 
