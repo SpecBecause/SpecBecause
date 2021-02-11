@@ -19,82 +19,93 @@ namespace SpecBecause.Tests
         {
             var engineType = Engine.Because(() => typeof(Engine));
 
-            engineType.ShouldNotBeNull();
-
             var becauseMethods = engineType.GetMethods().Where(x => x.Name == "Because").ToList();
-            becauseMethods.Count.ShouldBe(2);
 
-            var genericBecauseMethod = becauseMethods.Single(x => x.IsGenericMethod);
+            Engine.It("should have methods named Because", () =>
+            {
+                becauseMethods.Count.ShouldBe(2);
+            });
 
-            genericBecauseMethod.GetGenericArguments()
-                .ShouldHaveSingleItem()
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.Name.ShouldBe("TResult");
-                    x.BaseType.ShouldBe(typeof(object));
-                });
+            Engine.It("should have a void Because method", () =>
+            {
+                var voidBecauseMethod = becauseMethods.Single(x => !x.IsGenericMethod);
 
-            genericBecauseMethod.GetParameters()
-                .ShouldHaveSingleItem()
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.Name.ShouldBe("act");
-                    x.ParameterType.Name.ShouldBe("Func`1");
-                    x.ParameterType.GetGenericArguments()
-                        .ShouldHaveSingleItem()
-                        .ShouldSatisfyAllConditions(y =>
-                        {
-                            y.Name.ShouldBe("TResult");
-                            y.BaseType.ShouldBe(typeof(object));
-                        });
-                });
+                voidBecauseMethod.GetParameters()
+                    .ShouldHaveSingleItem()
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe("act");
+                        x.ParameterType.Name.ShouldBe("Action");
+                    });
 
-            genericBecauseMethod.ReturnType
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.Name.ShouldBe("TResult");
-                    x.BaseType.ShouldBe(typeof(object));
-                });
+                voidBecauseMethod.ReturnType
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe("Void");
+                    });
+            });
 
-            var voidBecauseMethod = becauseMethods.Single(x => !x.IsGenericMethod);
+            Engine.It("should have a generic Because method", () =>
+            {
+                var genericBecauseMethod = becauseMethods.Single(x => x.IsGenericMethod);
 
-            voidBecauseMethod.GetParameters()
-                .ShouldHaveSingleItem()
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.Name.ShouldBe("act");
-                    x.ParameterType.Name.ShouldBe("Action");
-                });
+                genericBecauseMethod.GetGenericArguments()
+                    .ShouldHaveSingleItem()
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe("TResult");
+                        x.BaseType.ShouldBe(typeof(object));
+                    });
 
-            voidBecauseMethod.ReturnType
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.Name.ShouldBe("Void");
-                });
+                genericBecauseMethod.GetParameters()
+                    .ShouldHaveSingleItem()
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe("act");
+                        x.ParameterType.Name.ShouldBe("Func`1");
+                        x.ParameterType.GetGenericArguments()
+                            .ShouldHaveSingleItem()
+                            .ShouldSatisfyAllConditions(y =>
+                            {
+                                y.Name.ShouldBe("TResult");
+                                y.BaseType.ShouldBe(typeof(object));
+                            });
+                    });
 
-            var itMethod = engineType.GetMethod("It");
-            itMethod.ShouldNotBeNull();
+                genericBecauseMethod.ReturnType
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe("TResult");
+                        x.BaseType.ShouldBe(typeof(object));
+                    });
+            });
 
-            var itParameters = itMethod.GetParameters();
-            itParameters.Length.ShouldBe(2);
-            itParameters.Single(x => x.Position == 0)
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.Name.ShouldBe("assertionMessage");
-                    x.ParameterType.ShouldBe(typeof(string));
-                });
-            itParameters.Single(x => x.Position == 1)
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.Name.ShouldBe("assertion");
-                    x.ParameterType.Name.ShouldBe("Action");
-                });
+            Engine.It("should have an It method", () =>
+            {
+                var itMethod = engineType.GetMethod("It");
+                itMethod.ShouldNotBeNull();
 
-            itMethod.ReturnType
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.Name.ShouldBe("Void");
-                });
+                var itParameters = itMethod.GetParameters();
+                itParameters.Length.ShouldBe(2);
+                itParameters.Single(x => x.Position == 0)
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe("assertionMessage");
+                        x.ParameterType.ShouldBe(typeof(string));
+                    });
+                itParameters.Single(x => x.Position == 1)
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe("assertion");
+                        x.ParameterType.Name.ShouldBe("Action");
+                    });
+
+                itMethod.ReturnType
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.Name.ShouldBe("Void");
+                    });
+            });
         }
 
         [Fact]
@@ -111,7 +122,10 @@ namespace SpecBecause.Tests
                 });
             });
 
-            callCount.ShouldBe(1);
+            Engine.It("should execute the act Action", () =>
+            {
+                callCount.ShouldBe(1);
+            });
         }
 
         [Fact]
@@ -125,7 +139,10 @@ namespace SpecBecause.Tests
                 return engineUnderTest.Because(() => expectedResult);
             });
 
-            result.ShouldBeSameAs(expectedResult);
+            Engine.It("should execute the act Func", () =>
+            {
+                result.ShouldBeSameAs(expectedResult);
+            });
         }
 
         [Fact]
@@ -149,6 +166,7 @@ namespace SpecBecause.Tests
                 itExecuted = true;
             });
 
+            // IMPORTANT: Do not place this if statement in an It call
             if (!itExecuted)
             {
                 throw new Exception($"{nameof(Engine)}.{nameof(Engine.It)} never executed.");
