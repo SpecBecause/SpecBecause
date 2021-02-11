@@ -5,7 +5,7 @@ using Xunit;
 
 namespace SpecBecause.Tests
 {
-    public class EngineTests
+    public class EngineTests : IDisposable
     {
         private Engine Engine { get; }
 
@@ -233,6 +233,57 @@ namespace SpecBecause.Tests
             {
                 throw new Exception($"{nameof(Engine)}.{nameof(Engine.It)} never executed.");
             }
+        }
+
+        [Fact]
+        public void When_calling_It_and_and_exception_is_thrown()
+        {
+            var engineUnderTest = new Engine();
+            var expectedException = new Exception(Guid.NewGuid().ToString());
+
+            var exception = Engine.BecauseThrows<Exception>(() =>
+                engineUnderTest.It(Guid.NewGuid().ToString(), () => throw expectedException));
+
+            Engine.It("should not immediately throw the exception", () =>
+            {
+                exception.ShouldBeNull();
+            });
+        }
+
+        [Fact]
+        public void When_disposing_of_Engine_and_an_exception_has_been_thrown()
+        {
+            var engineUnderTest = new Engine();
+
+            var expectedException = new Exception(Guid.NewGuid().ToString());
+            engineUnderTest.It(Guid.NewGuid().ToString(), () => throw expectedException);
+
+            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Dispose());
+
+            var failedToThrow = false;
+            Engine.It("should throw the exception", () =>
+            {
+                try
+                {
+                    exception.ShouldBeSameAs(expectedException);
+                }
+                catch (Exception)
+                {
+                    failedToThrow = true;
+                    throw;
+                }
+            });
+
+            // IMPORTANT: Do not place this if statement in an It call
+            if (failedToThrow)
+            {
+                throw new Exception("Failed to throw exception on Dispose.");
+            }
+        }
+
+        public void Dispose()
+        {
+            Engine.Dispose();
         }
     }
 }
