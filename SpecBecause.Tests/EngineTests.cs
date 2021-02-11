@@ -21,6 +21,11 @@ namespace SpecBecause.Tests
 
             var becauseMethods = engineType.GetMethods().Where(x => x.Name == "Because").ToList();
 
+            Engine.It($"should implement {nameof(IDisposable)}", () =>
+            {
+                engineType.GetInterface(nameof(IDisposable)).ShouldNotBeNull();
+            });
+
             Engine.It("should have methods named Because", () =>
             {
                 becauseMethods.Count.ShouldBe(2);
