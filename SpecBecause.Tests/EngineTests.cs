@@ -211,9 +211,9 @@ namespace SpecBecause.Tests
             {
                 exception.ShouldSatisfyAllConditions(x =>
                 {
-                    exception.ShouldNotBeSameAs(unexpectedException);
-                    exception.Message.ShouldBe("Act threw an unexpected exception.");
-                    exception.InnerException.ShouldBeSameAs(unexpectedException);
+                    x.ShouldNotBeSameAs(unexpectedException);
+                    x!.Message.ShouldBe("Act threw an unexpected exception.");
+                    x.InnerException.ShouldBeSameAs(unexpectedException);
                 });
             });
         }
@@ -275,7 +275,7 @@ namespace SpecBecause.Tests
         }
 
         [Fact]
-        public void When_disposing_of_Engine_and_an_exception_has_been_captured()
+        public void When_disposing_and_an_exception_has_been_captured()
         {
             var engineUnderTest = new Engine();
 
@@ -306,7 +306,7 @@ namespace SpecBecause.Tests
         }
 
         [Fact]
-        public void When_disposing_of_Engine_and_multiple_exceptions_have_been_captured()
+        public void When_disposing_and_multiple_exceptions_have_been_captured()
         {
             var engineUnderTest = new Engine();
 
@@ -321,7 +321,7 @@ namespace SpecBecause.Tests
             {
                 exception.ShouldSatisfyAllConditions(x =>
                 {
-                    x.InnerExceptions.Count.ShouldBe(2);
+                    x!.InnerExceptions.Count.ShouldBe(2);
                     x.InnerExceptions.ShouldContain(expectedException1);
                     x.InnerExceptions.ShouldContain(expectedException2);
                 });
