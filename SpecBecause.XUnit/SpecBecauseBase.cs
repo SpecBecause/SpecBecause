@@ -23,7 +23,7 @@ namespace SpecBecause.XUnit
 
         public TException? BecauseThrows<TException>(Action act) where TException : Exception
         {
-            throw new NotImplementedException();
+            return Engine.BecauseThrows<TException>(act);
         }
 
         public void It(string assertionMessage, Action assertion)

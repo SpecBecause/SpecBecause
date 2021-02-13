@@ -72,27 +72,40 @@ namespace SpecBecause.XUnit.Tests
         public void When_calling_void_Because()
         {
             var mocker = new AutoMoqer(new Config());
-            Action act = () => { };
+            Action expectedAct = () => { };
             var classUnderTest = mocker.Create<SpecBecauseBase>();
 
-            Because(() => classUnderTest.Because(act));
+            Because(() => classUnderTest.Because(expectedAct));
 
-            mocker.GetMock<IEngine>().Verify(x => x.Because(act), Times.Once);
+            mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once);
         }
 
         [Fact]
         public void When_calling_generic_Because()
         {
             var mocker = new AutoMoqer(new Config());
-            Func<int> act = () => 1;
-            mocker.GetMock<IEngine>().Setup(x => x.Because(act)).Returns(1);
+            int expectedResult = 1;
+            Func<int> expectedAct = () => expectedResult;
+            mocker.GetMock<IEngine>().Setup(x => x.Because(expectedAct)).Returns(expectedResult);
             var classUnderTest = mocker.Create<SpecBecauseBase>();
             
-            var result = Because(() => classUnderTest.Because(act));
+            var result = Because(() => classUnderTest.Because(expectedAct));
 
-            mocker.GetMock<IEngine>().Verify(x => x.Because(act), Times.Once);
+            result.ShouldBe(expectedResult);
+        }
 
-            result.ShouldBe(1);
+        [Fact]
+        public void When_calling_BecauseThrows()
+        {
+            var mocker = new AutoMoqer(new Config());
+            Action expectedAct = () => { };
+            var expectedException = new Exception();
+            mocker.GetMock<IEngine>().Setup(x => x.BecauseThrows<Exception>(expectedAct)).Returns(expectedException);
+            var classUnderTest = mocker.Create<SpecBecauseBase>();
+
+            var exception = Because(() => classUnderTest.BecauseThrows<Exception>(expectedAct));
+
+            exception.ShouldBe(expectedException);
         }
     }
 }
