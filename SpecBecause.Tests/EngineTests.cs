@@ -1,37 +1,31 @@
 using Shouldly;
+using SpecBecause.XUnit;
 using System;
 using System.Linq;
 using Xunit;
 
 namespace SpecBecause.Tests
 {
-    public class EngineTests : IDisposable
+    public class EngineTests : SpecBecauseBase
     {
-        private Engine Engine { get; }
-
-        public EngineTests()
-        {
-            Engine = new Engine();
-        }
-
         [Fact]
         public void When_the_type_Engine_is_loaded()
         {
-            var engineType = Engine.Because(() => typeof(Engine));
+            var engineType = Because(() => typeof(Engine));
 
             var becauseMethods = engineType.GetMethods().Where(x => x.Name == "Because").ToList();
 
-            Engine.It($"should implement {nameof(IDisposable)}", () =>
+            It($"should implement {nameof(IDisposable)}", () =>
             {
                 engineType.GetInterface(nameof(IDisposable)).ShouldNotBeNull();
             });
 
-            Engine.It("should have methods named Because", () =>
+            It("should have methods named Because", () =>
             {
                 becauseMethods.Count.ShouldBe(2);
             });
 
-            Engine.It("should have a void Because method", () =>
+            It("should have a void Because method", () =>
             {
                 var voidBecauseMethod = becauseMethods.Single(x => !x.IsGenericMethod);
 
@@ -50,7 +44,7 @@ namespace SpecBecause.Tests
                     });
             });
 
-            Engine.It("should have a generic Because method", () =>
+            It("should have a generic Because method", () =>
             {
                 const string becauseGenericTypeName = "TResult";
                 var genericBecauseMethod = becauseMethods.Single(x => x.IsGenericMethod);
@@ -86,7 +80,7 @@ namespace SpecBecause.Tests
                     });
             });
 
-            Engine.It("should have a BecauseThrows method", () =>
+            It("should have a BecauseThrows method", () =>
             {
                 const string becauseThrowsGenericTypeName = "TException";
                 var becauseThrowsMethod = engineType.GetMethod("BecauseThrows");
@@ -120,7 +114,7 @@ namespace SpecBecause.Tests
                     });
             });
 
-            Engine.It("should have an It method", () =>
+            It("should have an It method", () =>
             {
                 var itMethod = engineType.GetMethod("It");
                 itMethod.ShouldNotBeNull();
@@ -154,7 +148,7 @@ namespace SpecBecause.Tests
             var engineUnderTest = new Engine();
             int callCount = 0;
 
-            Engine.Because(() =>
+            Because(() =>
             {
                 engineUnderTest.Because(() =>
                 {
@@ -162,7 +156,7 @@ namespace SpecBecause.Tests
                 });
             });
 
-            Engine.It("should execute the act Action", () =>
+            It("should execute the act Action", () =>
             {
                 callCount.ShouldBe(1);
             });
@@ -174,12 +168,12 @@ namespace SpecBecause.Tests
             var engineUnderTest = new Engine();
             var expectedResult = new object();
 
-            var result = Engine.Because(() =>
+            var result = Because(() =>
             {
                 return engineUnderTest.Because(() => expectedResult);
             });
 
-            Engine.It("should execute the act Func", () =>
+            It("should execute the act Func", () =>
             {
                 result.ShouldBeSameAs(expectedResult);
             });
@@ -191,9 +185,9 @@ namespace SpecBecause.Tests
             var engineUnderTest = new Engine();
             var expectedException = new InvalidOperationException(Guid.NewGuid().ToString());
 
-            var exception = Engine.Because(() => engineUnderTest.BecauseThrows<InvalidOperationException>(() => throw expectedException));
+            var exception = Because(() => engineUnderTest.BecauseThrows<InvalidOperationException>(() => throw expectedException));
 
-            Engine.It("should catch and return the thrown exception", () =>
+            It("should catch and return the thrown exception", () =>
             {
                 exception.ShouldBeSameAs(expectedException);
             });
@@ -205,9 +199,9 @@ namespace SpecBecause.Tests
             var engineUnderTest = new Engine();
             var unexpectedException = new Exception(Guid.NewGuid().ToString());
 
-            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.BecauseThrows<InvalidOperationException>(() => throw unexpectedException));
+            var exception = BecauseThrows<Exception>(() => engineUnderTest.BecauseThrows<InvalidOperationException>(() => throw unexpectedException));
 
-            Engine.It("should catch and return the thrown exception", () =>
+            It("should catch and return the thrown exception", () =>
             {
                 exception.ShouldSatisfyAllConditions(x =>
                 {
@@ -224,9 +218,9 @@ namespace SpecBecause.Tests
         {
             var engineUnderTest = new Engine();
 
-            var exception = Engine.Because(() => engineUnderTest.BecauseThrows<InvalidOperationException>(() => { }));
+            var exception = Because(() => engineUnderTest.BecauseThrows<InvalidOperationException>(() => { }));
 
-            Engine.It("should return null", () =>
+            It("should return null", () =>
             {
                 exception.ShouldBeNull();
             });
@@ -239,7 +233,7 @@ namespace SpecBecause.Tests
             engineUnderTest.Because(() => { });
             var callCount = 0;
 
-            Engine.Because(() =>
+            Because(() =>
             {
                 engineUnderTest.It(Guid.NewGuid().ToString(), () =>
                 {
@@ -248,7 +242,7 @@ namespace SpecBecause.Tests
             });
 
             var itExecuted = false;
-            Engine.It("should execute the assertion action", () =>
+            It("should execute the assertion action", () =>
             {
                 callCount.ShouldBe(1);
                 itExecuted = true;
@@ -268,10 +262,10 @@ namespace SpecBecause.Tests
             engineUnderTest.Because(() => { });
             var expectedException = new Exception(Guid.NewGuid().ToString());
 
-            var exception = Engine.BecauseThrows<Exception>(() =>
+            var exception = BecauseThrows<Exception>(() =>
                 engineUnderTest.It(Guid.NewGuid().ToString(), () => throw expectedException));
 
-            Engine.It("should not immediately throw the exception", () =>
+            It("should not immediately throw the exception", () =>
             {
                 exception.ShouldBeNull();
             });
@@ -287,10 +281,10 @@ namespace SpecBecause.Tests
             var assertionMessage = Guid.NewGuid().ToString();
             engineUnderTest.It(assertionMessage, () => throw expectedException);
 
-            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Dispose());
+            var exception = BecauseThrows<Exception>(() => engineUnderTest.Dispose());
 
             var failedToThrow = false;
-            Engine.It("should throw the exception", () =>
+            It("should throw the exception", () =>
             {
                 try
                 {
@@ -329,9 +323,9 @@ namespace SpecBecause.Tests
             engineUnderTest.It(assertionMessage1, () => throw expectedException1);
             engineUnderTest.It(assertionMessage2, () => throw expectedException2);
 
-            var exception = Engine.BecauseThrows<AggregateException>(() => engineUnderTest.Dispose());
+            var exception = BecauseThrows<AggregateException>(() => engineUnderTest.Dispose());
 
-            Engine.It("should aggregate and throw all captured exceptions", () =>
+            It("should aggregate and throw all captured exceptions", () =>
             {
                 exception.ShouldSatisfyAllConditions(x =>
                 {
@@ -358,9 +352,9 @@ namespace SpecBecause.Tests
         {
             var engineUnderTest = new Engine();
 
-            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Dispose());
+            var exception = BecauseThrows<Exception>(() => engineUnderTest.Dispose());
 
-            Engine.It($"should notify the developer to call {nameof(Engine.Because)}", () =>
+            It($"should notify the developer to call {nameof(Engine.Because)}", () =>
                 exception.ShouldSatisfyAllConditions(x =>
                 {
                     x.ShouldNotBeNull();
@@ -375,9 +369,9 @@ namespace SpecBecause.Tests
             var engineUnderTest = new Engine();
             engineUnderTest.Because(() => { });
 
-            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Dispose());
+            var exception = BecauseThrows<Exception>(() => engineUnderTest.Dispose());
 
-            Engine.It($"should notify the developer to {nameof(Engine.It)}", () =>
+            It($"should notify the developer to {nameof(Engine.It)}", () =>
                 exception.ShouldSatisfyAllConditions(x =>
                 {
                     x.ShouldNotBeNull();
@@ -391,9 +385,9 @@ namespace SpecBecause.Tests
         {
             var engineUnderTest = new Engine();
 
-            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.It(Guid.NewGuid().ToString(), () => { }));
+            var exception = BecauseThrows<Exception>(() => engineUnderTest.It(Guid.NewGuid().ToString(), () => { }));
 
-            Engine.It($"should notify the developer that {nameof(Engine.Because)} must be called before {nameof(Engine.It)}", () =>
+            It($"should notify the developer that {nameof(Engine.Because)} must be called before {nameof(Engine.It)}", () =>
                 exception.ShouldSatisfyAllConditions(x =>
                 {
                     x.ShouldNotBeNull();
@@ -409,9 +403,9 @@ namespace SpecBecause.Tests
             engineUnderTest.Because(() => { });
             engineUnderTest.It(Guid.NewGuid().ToString(), () => { });
 
-            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Because(() => { }));
+            var exception = BecauseThrows<Exception>(() => engineUnderTest.Because(() => { }));
 
-            Engine.It($"should notify the developer that {nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}", () =>
+            It($"should notify the developer that {nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}", () =>
                 exception.ShouldSatisfyAllConditions(x =>
                 {
                     x.ShouldNotBeNull();
@@ -427,9 +421,9 @@ namespace SpecBecause.Tests
             engineUnderTest.Because(() => { });
             engineUnderTest.It(Guid.NewGuid().ToString(), () => { });
 
-            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Because(() => 0));
+            var exception = BecauseThrows<Exception>(() => engineUnderTest.Because(() => 0));
 
-            Engine.It($"should notify the developer that {nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}", () =>
+            It($"should notify the developer that {nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}", () =>
                 exception.ShouldSatisfyAllConditions(x =>
                 {
                     x.ShouldNotBeNull();
@@ -445,20 +439,15 @@ namespace SpecBecause.Tests
             engineUnderTest.Because(() => { });
             engineUnderTest.It(Guid.NewGuid().ToString(), () => { });
 
-            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.BecauseThrows<Exception>(() => throw new Exception()));
+            var exception = BecauseThrows<Exception>(() => engineUnderTest.BecauseThrows<Exception>(() => throw new Exception()));
 
-            Engine.It($"should notify the developer that {nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}", () =>
+            It($"should notify the developer that {nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}", () =>
                 exception.ShouldSatisfyAllConditions(x =>
                 {
                     x.ShouldNotBeNull();
                     x.Message.ShouldBe($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
                 })
             );
-        }
-
-        public void Dispose()
-        {
-            Engine.Dispose();
         }
     }
 }
