@@ -31,6 +31,8 @@ namespace SpecBecause.XUnit.Tests
                             y.DefaultValue.ShouldBeNull();
                         });
                 });
+
+            specBecauseBaseType.GetInterface(nameof(IEngine)).ShouldNotBeNull();
         }
 
         [Fact]
@@ -44,6 +46,22 @@ namespace SpecBecause.XUnit.Tests
             {
                 x.ShouldNotBeNull();
                 x.ShouldBeOfType<Engine>();
+            });
+        }
+
+        [Fact]
+        public void When_constructing_with_arguments()
+        {
+            var expectedEngine = new Engine();
+            var classUnderTest = new SpecBecauseBase(expectedEngine);
+
+            var engineProperty = typeof(SpecBecauseBase).GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            engineProperty!.GetValue(classUnderTest).ShouldSatisfyAllConditions(x =>
+            {
+                x.ShouldNotBeNull();
+                x.ShouldBeOfType<Engine>();
+                x.ShouldBeSameAs(expectedEngine);
             });
         }
     }
