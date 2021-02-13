@@ -5,43 +5,27 @@ namespace SpecBecause
 {
     public class Engine : IDisposable
     {
+        private CallState State { get; } = new CallState();
         private List<Exception> CapturedExceptions { get; } = new List<Exception>();
-        private bool BecauseWasCalled { get; set; }
-        private bool ItWasCalled { get; set; }
 
 
         public void Because(Action act)
         {
-            if (ItWasCalled)
-            {
-                throw new Exception($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
-            }
-
-            BecauseWasCalled = true;
+            State.SetBecauseWasCalled();
 
             act();
         }
 
         public TResult Because<TResult>(Func<TResult> act)
         {
-            if (ItWasCalled)
-            {
-                throw new Exception($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
-            }
-
-            BecauseWasCalled = true;
+            State.SetBecauseWasCalled();
 
             return act();
         }
 
         public TException? BecauseThrows<TException>(Action act) where TException : Exception
         {
-            if (ItWasCalled)
-            {
-                throw new Exception($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
-            }
-
-            BecauseWasCalled = true;
+            State.SetBecauseWasCalled();
 
             try
             {
@@ -60,12 +44,7 @@ namespace SpecBecause
         }
         public void It(string assertionMessage, Action assertion)
         {
-            if (!BecauseWasCalled)
-            {
-                throw new Exception($"{nameof(Engine.Because)} must be called before {nameof(Engine.It)}.");
-            }
-
-            ItWasCalled = true;
+            State.SetItWasCalled();
 
             try
             {
@@ -79,7 +58,7 @@ namespace SpecBecause
 
         public void Dispose()
         {
-            if (!BecauseWasCalled || !ItWasCalled)
+            if (!State.IsReadyForDisposal)
             {
                 throw new Exception("Friendly reminder when using Engine you must call Because and It methods before disposing.");
             }
@@ -91,6 +70,34 @@ namespace SpecBecause
             else if (CapturedExceptions.Count > 1)
             {
                 throw new AggregateException(CapturedExceptions);
+            }
+        }
+
+
+        private class CallState
+        {
+            private bool BecauseWasCalled { get; set; }
+            private bool ItWasCalled { get; set; }
+            public bool IsReadyForDisposal => BecauseWasCalled && ItWasCalled;
+
+            public void SetBecauseWasCalled()
+            {
+                if (ItWasCalled)
+                {
+                    throw new Exception($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
+                }
+
+                BecauseWasCalled = true;
+            }
+
+            public void SetItWasCalled()
+            {
+                if (!BecauseWasCalled)
+                {
+                    throw new Exception($"{nameof(Engine.Because)} must be called before {nameof(Engine.It)}.");
+                }
+
+                ItWasCalled = true;
             }
         }
     }
