@@ -5,12 +5,26 @@ namespace SpecBecause
 {
     public class Engine : IDisposable
     {
-        private List<Exception> capturedExceptions = new List<Exception>();
+        private List<Exception> CapturedExceptions { get; } = new List<Exception>();
+        private bool BecauseWasCalled { get; set; }
 
-        public void Because(Action act) => act();
-        public TResult Because<TResult>(Func<TResult> act) => act();
+
+        public void Because(Action act)
+        {
+            BecauseWasCalled = true;
+            act();
+        }
+
+        public TResult Because<TResult>(Func<TResult> act)
+        {
+            BecauseWasCalled = true;
+            return act();
+        }
+
         public TException? BecauseThrows<TException>(Action act) where TException : Exception
         {
+            BecauseWasCalled = true;
+
             try
             {
                 act();
@@ -34,19 +48,24 @@ namespace SpecBecause
             }
             catch (Exception ex)
             {
-                capturedExceptions.Add(ex);
+                CapturedExceptions.Add(ex);
             }
         }
 
         public void Dispose()
         {
-            if (capturedExceptions.Count == 1)
+            if (!BecauseWasCalled)
             {
-                throw capturedExceptions[0];
+                throw new Exception("Friendly reminder when using Engine you must call Because and It methods before disposing.");
             }
-            else if (capturedExceptions.Count > 1)
+
+            if (CapturedExceptions.Count == 1)
             {
-                throw new AggregateException(capturedExceptions);
+                throw CapturedExceptions[0];
+            }
+            else if (CapturedExceptions.Count > 1)
+            {
+                throw new AggregateException(CapturedExceptions);
             }
         }
     }

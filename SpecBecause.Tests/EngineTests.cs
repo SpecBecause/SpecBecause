@@ -278,6 +278,7 @@ namespace SpecBecause.Tests
         public void When_disposing_and_an_exception_has_been_captured()
         {
             var engineUnderTest = new Engine();
+            engineUnderTest.Because(() => { });
 
             var expectedException = new Exception(Guid.NewGuid().ToString());
             engineUnderTest.It(Guid.NewGuid().ToString(), () => throw expectedException);
@@ -309,6 +310,7 @@ namespace SpecBecause.Tests
         public void When_disposing_and_multiple_exceptions_have_been_captured()
         {
             var engineUnderTest = new Engine();
+            engineUnderTest.Because(() => { });
 
             var expectedException1 = new Exception(Guid.NewGuid().ToString());
             var expectedException2 = new Exception(Guid.NewGuid().ToString());
@@ -326,6 +328,18 @@ namespace SpecBecause.Tests
                     x.InnerExceptions.ShouldContain(expectedException2);
                 });
             });
+        }
+
+        [Fact]
+        public void When_disposing_and_Because_was_not_called()
+        {
+            var engineUnderTest = new Engine();
+
+            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Dispose());
+
+            Engine.It($"should kindly inform the developer to call {nameof(Engine.Because)}", () =>
+                exception!.Message.ShouldBe($"Friendly reminder when using {nameof(Engine)} you must call Because and It methods before disposing.")
+            );
         }
 
         public void Dispose()
