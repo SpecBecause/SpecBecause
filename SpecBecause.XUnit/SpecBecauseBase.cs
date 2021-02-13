@@ -18,7 +18,7 @@ namespace SpecBecause.XUnit
 
         public TResult Because<TResult>(Func<TResult> act)
         {
-            throw new NotImplementedException();
+            return Engine.Because(act);
         }
 
         public TException? BecauseThrows<TException>(Action act) where TException : Exception

@@ -72,13 +72,27 @@ namespace SpecBecause.XUnit.Tests
         public void When_calling_void_Because()
         {
             var mocker = new AutoMoqer(new Config());
-
+            Action act = () => { };
             var classUnderTest = mocker.Create<SpecBecauseBase>();
 
-            Action act = () => { };
-            classUnderTest.Because(act);
+            Because(() => classUnderTest.Because(act));
 
             mocker.GetMock<IEngine>().Verify(x => x.Because(act), Times.Once);
+        }
+
+        [Fact]
+        public void When_calling_generic_Because()
+        {
+            var mocker = new AutoMoqer(new Config());
+            Func<int> act = () => 1;
+            mocker.GetMock<IEngine>().Setup(x => x.Because(act)).Returns(1);
+            var classUnderTest = mocker.Create<SpecBecauseBase>();
+            
+            var result = Because(() => classUnderTest.Because(act));
+
+            mocker.GetMock<IEngine>().Verify(x => x.Because(act), Times.Once);
+
+            result.ShouldBe(1);
         }
     }
 }
