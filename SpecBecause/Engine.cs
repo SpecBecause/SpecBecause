@@ -7,6 +7,7 @@ namespace SpecBecause
     {
         private List<Exception> CapturedExceptions { get; } = new List<Exception>();
         private bool BecauseWasCalled { get; set; }
+        private bool ItWasCalled { get; set; }
 
 
         public void Because(Action act)
@@ -42,6 +43,8 @@ namespace SpecBecause
         }
         public void It(string assertionMessage, Action assertion)
         {
+            ItWasCalled = true;
+
             try
             {
                 assertion();
@@ -54,7 +57,7 @@ namespace SpecBecause
 
         public void Dispose()
         {
-            if (!BecauseWasCalled)
+            if (!BecauseWasCalled || !ItWasCalled)
             {
                 throw new Exception("Friendly reminder when using Engine you must call Because and It methods before disposing.");
             }

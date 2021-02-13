@@ -338,7 +338,28 @@ namespace SpecBecause.Tests
             var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Dispose());
 
             Engine.It($"should kindly inform the developer to call {nameof(Engine.Because)}", () =>
-                exception!.Message.ShouldBe($"Friendly reminder when using {nameof(Engine)} you must call Because and It methods before disposing.")
+                exception.ShouldSatisfyAllConditions(x =>
+                {
+                    x.ShouldNotBeNull();
+                    x.Message.ShouldBe($"Friendly reminder when using {nameof(Engine)} you must call {nameof(Engine.Because)} and {nameof(Engine.It)} methods before disposing.");
+                })
+            );
+        }
+
+        [Fact]
+        public void When_disposing_and_It_was_not_called()
+        {
+            var engineUnderTest = new Engine();
+            engineUnderTest.Because(() => { });
+
+            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Dispose());
+
+            Engine.It($"should kindly inform the developer to {nameof(Engine.It)}", () =>
+                exception.ShouldSatisfyAllConditions(x =>
+                {
+                    x.ShouldNotBeNull();
+                    x.Message.ShouldBe($"Friendly reminder when using {nameof(Engine)} you must call {nameof(Engine.Because)} and {nameof(Engine.It)} methods before disposing.");
+                })
             );
         }
 
