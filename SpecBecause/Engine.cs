@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpecBecause
 {
-    public class Engine : IDisposable
+    public class Engine : IEngine
     {
         private CallState State { get; } = new CallState();
         private List<Exception> CapturedExceptions { get; } = new List<Exception>();
