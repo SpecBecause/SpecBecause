@@ -43,6 +43,11 @@ namespace SpecBecause
         }
         public void It(string assertionMessage, Action assertion)
         {
+            if (!BecauseWasCalled)
+            {
+                throw new Exception($"{nameof(Engine.Because)} must be called before {nameof(Engine.It)}");
+            }
+
             ItWasCalled = true;
 
             try

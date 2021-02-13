@@ -235,6 +235,7 @@ namespace SpecBecause.Tests
         public void When_calling_It()
         {
             var engineUnderTest = new Engine();
+            engineUnderTest.Because(() => { });
             var callCount = 0;
 
             Engine.Because(() =>
@@ -263,6 +264,7 @@ namespace SpecBecause.Tests
         public void When_calling_It_and_and_exception_is_thrown()
         {
             var engineUnderTest = new Engine();
+            engineUnderTest.Because(() => { });
             var expectedException = new Exception(Guid.NewGuid().ToString());
 
             var exception = Engine.BecauseThrows<Exception>(() =>
@@ -337,7 +339,7 @@ namespace SpecBecause.Tests
 
             var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Dispose());
 
-            Engine.It($"should kindly inform the developer to call {nameof(Engine.Because)}", () =>
+            Engine.It($"should notify the developer to call {nameof(Engine.Because)}", () =>
                 exception.ShouldSatisfyAllConditions(x =>
                 {
                     x.ShouldNotBeNull();
@@ -354,11 +356,27 @@ namespace SpecBecause.Tests
 
             var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Dispose());
 
-            Engine.It($"should kindly inform the developer to {nameof(Engine.It)}", () =>
+            Engine.It($"should notify the developer to {nameof(Engine.It)}", () =>
                 exception.ShouldSatisfyAllConditions(x =>
                 {
                     x.ShouldNotBeNull();
                     x.Message.ShouldBe($"Friendly reminder when using {nameof(Engine)} you must call {nameof(Engine.Because)} and {nameof(Engine.It)} methods before disposing.");
+                })
+            );
+        }
+
+        [Fact]
+        public void When_calling_It_before_Because()
+        {
+            var engineUnderTest = new Engine();
+
+            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.It(Guid.NewGuid().ToString(), () => { }));
+
+            Engine.It($"should notify the developer that {nameof(Engine.Because)} must be called before {nameof(Engine.It)}", () =>
+                exception.ShouldSatisfyAllConditions(x =>
+                {
+                    x.ShouldNotBeNull();
+                    x.Message.ShouldBe($"{nameof(Engine.Because)} must be called before {nameof(Engine.It)}");
                 })
             );
         }
