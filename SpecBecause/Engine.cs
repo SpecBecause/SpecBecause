@@ -12,18 +12,35 @@ namespace SpecBecause
 
         public void Because(Action act)
         {
+            if (ItWasCalled)
+            {
+                throw new Exception($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
+            }
+
             BecauseWasCalled = true;
+
             act();
         }
 
         public TResult Because<TResult>(Func<TResult> act)
         {
+            if (ItWasCalled)
+            {
+                throw new Exception($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
+            }
+
             BecauseWasCalled = true;
+
             return act();
         }
 
         public TException? BecauseThrows<TException>(Action act) where TException : Exception
         {
+            if (ItWasCalled)
+            {
+                throw new Exception($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
+            }
+
             BecauseWasCalled = true;
 
             try
@@ -45,7 +62,7 @@ namespace SpecBecause
         {
             if (!BecauseWasCalled)
             {
-                throw new Exception($"{nameof(Engine.Because)} must be called before {nameof(Engine.It)}");
+                throw new Exception($"{nameof(Engine.Because)} must be called before {nameof(Engine.It)}.");
             }
 
             ItWasCalled = true;

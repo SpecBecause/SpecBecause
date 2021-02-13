@@ -376,7 +376,61 @@ namespace SpecBecause.Tests
                 exception.ShouldSatisfyAllConditions(x =>
                 {
                     x.ShouldNotBeNull();
-                    x.Message.ShouldBe($"{nameof(Engine.Because)} must be called before {nameof(Engine.It)}");
+                    x.Message.ShouldBe($"{nameof(Engine.Because)} must be called before {nameof(Engine.It)}.");
+                })
+            );
+        }
+
+        [Fact]
+        public void When_calling_void_Because_after_It()
+        {
+            var engineUnderTest = new Engine();
+            engineUnderTest.Because(() => { });
+            engineUnderTest.It(Guid.NewGuid().ToString(), () => { });
+
+            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Because(() => { }));
+
+            Engine.It($"should notify the developer that {nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}", () =>
+                exception.ShouldSatisfyAllConditions(x =>
+                {
+                    x.ShouldNotBeNull();
+                    x.Message.ShouldBe($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
+                })
+            );
+        }
+
+        [Fact]
+        public void When_calling_generic_Because_after_It()
+        {
+            var engineUnderTest = new Engine();
+            engineUnderTest.Because(() => { });
+            engineUnderTest.It(Guid.NewGuid().ToString(), () => { });
+
+            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Because(() => 0));
+
+            Engine.It($"should notify the developer that {nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}", () =>
+                exception.ShouldSatisfyAllConditions(x =>
+                {
+                    x.ShouldNotBeNull();
+                    x.Message.ShouldBe($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
+                })
+            );
+        }
+
+        [Fact]
+        public void When_calling_BecauseThrows_after_It()
+        {
+            var engineUnderTest = new Engine();
+            engineUnderTest.Because(() => { });
+            engineUnderTest.It(Guid.NewGuid().ToString(), () => { });
+
+            var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.BecauseThrows<Exception>(() => throw new Exception()));
+
+            Engine.It($"should notify the developer that {nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}", () =>
+                exception.ShouldSatisfyAllConditions(x =>
+                {
+                    x.ShouldNotBeNull();
+                    x.Message.ShouldBe($"{nameof(Engine.Because)} cannot be called after {nameof(Engine.It)}.");
                 })
             );
         }
