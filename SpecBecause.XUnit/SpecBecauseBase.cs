@@ -33,7 +33,7 @@ namespace SpecBecause.XUnit
 
         public void Dispose()
         {
-            
+            Engine.Dispose();
         }
     }
 }
