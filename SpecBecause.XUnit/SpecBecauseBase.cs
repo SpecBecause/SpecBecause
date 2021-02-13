@@ -13,7 +13,7 @@ namespace SpecBecause.XUnit
 
         public void Because(Action act)
         {
-            throw new NotImplementedException();
+            Engine.Because(act);
         }
 
         public TResult Because<TResult>(Func<TResult> act)

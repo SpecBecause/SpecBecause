@@ -1,6 +1,9 @@
 using Shouldly;
 using System.Reflection;
 using Xunit;
+using AutoMoqCore;
+using System;
+using Moq;
 
 namespace SpecBecause.XUnit.Tests
 {
@@ -63,6 +66,19 @@ namespace SpecBecause.XUnit.Tests
                 x.ShouldBeOfType<Engine>();
                 x.ShouldBeSameAs(expectedEngine);
             });
+        }
+
+        [Fact]
+        public void When_calling_void_Because()
+        {
+            var mocker = new AutoMoqer(new Config());
+
+            var classUnderTest = mocker.Create<SpecBecauseBase>();
+
+            Action act = () => { };
+            classUnderTest.Because(act);
+
+            mocker.GetMock<IEngine>().Verify(x => x.Because(act), Times.Once);
         }
     }
 }
