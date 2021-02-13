@@ -107,5 +107,18 @@ namespace SpecBecause.XUnit.Tests
 
             exception.ShouldBe(expectedException);
         }
+
+        [Fact]
+        public void When_calling_It()
+        {
+            var mocker = new AutoMoqer(new Config());
+            var expectedAssertionMessage = Guid.NewGuid().ToString();
+            Action expectedAssertion = () => { };
+            var classUnderTest = mocker.Create<SpecBecauseBase>();
+
+            Because(() => classUnderTest.It(expectedAssertionMessage, expectedAssertion));
+
+            mocker.GetMock<IEngine>().Verify(x => x.It(expectedAssertionMessage, expectedAssertion), Times.Once);
+        }
     }
 }
