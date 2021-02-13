@@ -37,7 +37,7 @@ namespace SpecBecause
             }
             catch (Exception ex)
             {
-                throw new Exception("Act threw an unexpected exception.", ex);
+                throw new EngineException("Act threw an unexpected exception.", ex);
             }
 
             return null;
@@ -52,7 +52,7 @@ namespace SpecBecause
             }
             catch (Exception ex)
             {
-                CapturedExceptions.Add(ex);
+                CapturedExceptions.Add(new EngineException(assertionMessage, ex));
             }
         }
 

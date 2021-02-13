@@ -212,6 +212,7 @@ namespace SpecBecause.Tests
                 exception.ShouldSatisfyAllConditions(x =>
                 {
                     x.ShouldNotBeSameAs(unexpectedException);
+                    x.ShouldBeOfType<EngineException>();
                     x!.Message.ShouldBe("Act threw an unexpected exception.");
                     x.InnerException.ShouldBeSameAs(unexpectedException);
                 });
@@ -283,7 +284,8 @@ namespace SpecBecause.Tests
             engineUnderTest.Because(() => { });
 
             var expectedException = new Exception(Guid.NewGuid().ToString());
-            engineUnderTest.It(Guid.NewGuid().ToString(), () => throw expectedException);
+            var assertionMessage = Guid.NewGuid().ToString();
+            engineUnderTest.It(assertionMessage, () => throw expectedException);
 
             var exception = Engine.BecauseThrows<Exception>(() => engineUnderTest.Dispose());
 
@@ -292,7 +294,13 @@ namespace SpecBecause.Tests
             {
                 try
                 {
-                    exception.ShouldBeSameAs(expectedException);
+                    exception.ShouldSatisfyAllConditions(x =>
+                    {
+                        x.ShouldNotBeNull();
+                        x.ShouldBeOfType<EngineException>();
+                        x.Message.ShouldBe(assertionMessage);
+                        x.InnerException.ShouldBeSameAs(expectedException);
+                    });
                 }
                 catch (Exception)
                 {
@@ -316,8 +324,10 @@ namespace SpecBecause.Tests
 
             var expectedException1 = new Exception(Guid.NewGuid().ToString());
             var expectedException2 = new Exception(Guid.NewGuid().ToString());
-            engineUnderTest.It(Guid.NewGuid().ToString(), () => throw expectedException1);
-            engineUnderTest.It(Guid.NewGuid().ToString(), () => throw expectedException2);
+            string assertionMessage1 = Guid.NewGuid().ToString();
+            string assertionMessage2 = Guid.NewGuid().ToString();
+            engineUnderTest.It(assertionMessage1, () => throw expectedException1);
+            engineUnderTest.It(assertionMessage2, () => throw expectedException2);
 
             var exception = Engine.BecauseThrows<AggregateException>(() => engineUnderTest.Dispose());
 
@@ -325,9 +335,20 @@ namespace SpecBecause.Tests
             {
                 exception.ShouldSatisfyAllConditions(x =>
                 {
-                    x!.InnerExceptions.Count.ShouldBe(2);
-                    x.InnerExceptions.ShouldContain(expectedException1);
-                    x.InnerExceptions.ShouldContain(expectedException2);
+                    x.ShouldNotBeNull();
+                    x.InnerExceptions.Count.ShouldBe(2);
+                    x.InnerExceptions.First().ShouldSatisfyAllConditions(y =>
+                    {
+                        y.ShouldBeOfType<EngineException>();
+                        y.Message.ShouldBe(assertionMessage1);
+                        y.InnerException.ShouldBe(expectedException1);
+                    });
+                    x.InnerExceptions.Last().ShouldSatisfyAllConditions(y =>
+                    {
+                        y.ShouldBeOfType<EngineException>();
+                        y.Message.ShouldBe(assertionMessage2);
+                        y.InnerException.ShouldBe(expectedException2);
+                    });
                 });
             });
         }
