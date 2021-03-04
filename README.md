@@ -1,6 +1,7 @@
 # SpecBecause
 Goal: Make the test grammar of NSpec and MSpec portable and with improved developer ergonomics.
 
+
 # How to use
 The `Engine` class exposes many kinds of `Because` methods and an `It` method. `Engine` is designed as a disposable so usage is best when paired with a `using` statement.
 
