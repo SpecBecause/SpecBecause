@@ -292,7 +292,7 @@ namespace SpecBecause.Tests
                     {
                         x.ShouldNotBeNull();
                         x.ShouldBeOfType<EngineException>();
-                        x.Message.ShouldBe(assertionMessage);
+                        x.Message.ShouldBe($"It {assertionMessage}");
                         x.InnerException.ShouldBeSameAs(expectedException);
                     });
                 }
@@ -334,13 +334,13 @@ namespace SpecBecause.Tests
                     x.InnerExceptions.First().ShouldSatisfyAllConditions(y =>
                     {
                         y.ShouldBeOfType<EngineException>();
-                        y.Message.ShouldBe(assertionMessage1);
+                        y.Message.ShouldBe($"It {assertionMessage1}");
                         y.InnerException.ShouldBe(expectedException1);
                     });
                     x.InnerExceptions.Last().ShouldSatisfyAllConditions(y =>
                     {
                         y.ShouldBeOfType<EngineException>();
-                        y.Message.ShouldBe(assertionMessage2);
+                        y.Message.ShouldBe($"It {assertionMessage2}");
                         y.InnerException.ShouldBe(expectedException2);
                     });
                 });

@@ -52,7 +52,7 @@ namespace SpecBecause
             }
             catch (Exception ex)
             {
-                CapturedExceptions.Add(new EngineException(assertionMessage, ex));
+                CapturedExceptions.Add(new EngineException($"It {assertionMessage}", ex));
             }
         }
 
