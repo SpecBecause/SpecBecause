@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpecBecause.XUnit.Tests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecBecause.XUnit", "SpecBecause.XUnit\SpecBecause.XUnit.csproj", "{8D02F57D-E2F2-45B1-9933-EAFD5A9AF23C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecBecause.NUnit", "SpecBecause.NUnit\SpecBecause.NUnit.csproj", "{09DB0120-B5B3-4B73-8915-9FA4D3B2C43E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpecBecause.NUnit.Tests", "SpecBecause.NUnit.Tests\SpecBecause.NUnit.Tests.csproj", "{73626CD9-B920-451D-B6EC-D2E680AD235C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{8D02F57D-E2F2-45B1-9933-EAFD5A9AF23C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D02F57D-E2F2-45B1-9933-EAFD5A9AF23C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D02F57D-E2F2-45B1-9933-EAFD5A9AF23C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09DB0120-B5B3-4B73-8915-9FA4D3B2C43E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09DB0120-B5B3-4B73-8915-9FA4D3B2C43E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09DB0120-B5B3-4B73-8915-9FA4D3B2C43E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09DB0120-B5B3-4B73-8915-9FA4D3B2C43E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73626CD9-B920-451D-B6EC-D2E680AD235C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73626CD9-B920-451D-B6EC-D2E680AD235C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73626CD9-B920-451D-B6EC-D2E680AD235C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73626CD9-B920-451D-B6EC-D2E680AD235C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
