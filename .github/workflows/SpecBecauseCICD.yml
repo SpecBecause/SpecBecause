@@ -1,11 +1,7 @@
-name: .NET
+name: CICD
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+on: workflow_dispatch
+  
 jobs:
   build:
 
@@ -20,6 +16,10 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore --configuration Release
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Pack SpecBecause
+      run: dotnet pack SpecBecause --no-build
+    - name: Publish SpecBecause
+      run: dotnet nuget push SpecBecause/bin/Release/*.nupkg --api-key --source https://api.nuget.org/v3/index.json

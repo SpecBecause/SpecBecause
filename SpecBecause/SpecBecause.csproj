@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -7,4 +7,14 @@
     <WarningsAsErrors>CS8600;CS8602;CS8603</WarningsAsErrors>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>SpecBecause</PackageId>
+    <Version>0.0.1-alpha</Version>
+    <Authors>Danny Warren, Ben Allred</Authors>
+    <Company>SpecBecause</Company>
+    <Description>
+      Goal: Make the test grammar of NSpec and MSpec portable and with improved developer ergonomics.
+    </Description>
+  </PropertyGroup>
+  
 </Project>
