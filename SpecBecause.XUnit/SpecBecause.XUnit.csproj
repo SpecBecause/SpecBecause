@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit.core" Version="2.4.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\SpecBecause\SpecBecause.csproj" />
   </ItemGroup>
 
