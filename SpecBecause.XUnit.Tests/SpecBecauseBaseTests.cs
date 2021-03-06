@@ -9,6 +9,13 @@ namespace SpecBecause.XUnit.Tests
 {
     public class SpecBecauseBaseTests : SpecBecauseBase
     {
+        private AutoMoqer mocker { get; set; }
+
+        public SpecBecauseBaseTests()
+        {
+            mocker = new AutoMoqer(new Config());
+        }
+
         [Fact]
         public void When_the_type_SpecBecauseBase_is_loaded()
         {
@@ -83,7 +90,6 @@ namespace SpecBecause.XUnit.Tests
         [Fact]
         public void When_calling_void_Because()
         {
-            var mocker = new AutoMoqer(new Config());
             Action expectedAct = () => { };
             var classUnderTest = mocker.Create<SpecBecauseBase>();
 
@@ -96,7 +102,6 @@ namespace SpecBecause.XUnit.Tests
         [Fact]
         public void When_calling_generic_Because()
         {
-            var mocker = new AutoMoqer(new Config());
             int expectedResult = 1;
             Func<int> expectedAct = () => expectedResult;
             mocker.GetMock<IEngine>().Setup(x => x.Because(expectedAct)).Returns(expectedResult);
@@ -114,7 +119,6 @@ namespace SpecBecause.XUnit.Tests
         [Fact]
         public void When_calling_BecauseThrows()
         {
-            var mocker = new AutoMoqer(new Config());
             Action expectedAct = () => { };
             var expectedException = new Exception();
             mocker.GetMock<IEngine>().Setup(x => x.BecauseThrows<Exception>(expectedAct)).Returns(expectedException);
@@ -132,7 +136,6 @@ namespace SpecBecause.XUnit.Tests
         [Fact]
         public void When_calling_It()
         {
-            var mocker = new AutoMoqer(new Config());
             var expectedAssertionMessage = Guid.NewGuid().ToString();
             Action expectedAssertion = () => { };
             var classUnderTest = mocker.Create<SpecBecauseBase>();
@@ -146,7 +149,6 @@ namespace SpecBecause.XUnit.Tests
         [Fact]
         public void When_calling_Dispose()
         {
-            var mocker = new AutoMoqer(new Config());
             var classUnderTest = mocker.Create<SpecBecauseBase>();
 
             Because(() => classUnderTest.Dispose());
