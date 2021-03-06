@@ -22,4 +22,4 @@ jobs:
     - name: Pack SpecBecause
       run: dotnet pack SpecBecause --no-build --configuration Release
     - name: Publish SpecBecause
-      run: dotnet nuget push SpecBecause/bin/Release/*.nupkg --api-key NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+      run: dotnet nuget push SpecBecause/bin/Release/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
