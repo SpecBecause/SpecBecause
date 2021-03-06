@@ -37,11 +37,7 @@ namespace SpecBecause.Tests
                         x.ParameterType.Name.ShouldBe("Action");
                     });
 
-                voidBecauseMethod.ReturnType
-                    .ShouldSatisfyAllConditions(x =>
-                    {
-                        x.Name.ShouldBe("Void");
-                    });
+                voidBecauseMethod.ReturnType.Name.ShouldBe("Void");
             });
 
             It("should have a generic Because method", () =>
@@ -134,11 +130,7 @@ namespace SpecBecause.Tests
                         x.ParameterType.Name.ShouldBe("Action");
                     });
 
-                itMethod.ReturnType
-                    .ShouldSatisfyAllConditions(x =>
-                    {
-                        x.Name.ShouldBe("Void");
-                    });
+                itMethod.ReturnType.Name.ShouldBe("Void");
             });
         }
 
