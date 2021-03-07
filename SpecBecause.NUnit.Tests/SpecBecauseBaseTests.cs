@@ -54,17 +54,7 @@ namespace SpecBecause.NUnit.Tests
             Engine.It($"implements {nameof(IEngine)}", () =>
                 specBecauseBaseType.GetInterface(nameof(IEngine)).ShouldNotBeNull());
 
-            Engine.It("should have an NUnit setup method", () =>
-                specBecauseBaseType.GetMethod("SetUp")
-                    .ShouldSatisfyAllConditions(x =>
-                    {
-                        x.GetParameters().ShouldBeEmpty();
-                        x.ReturnType.Name.ShouldBe("Void");
-                        x.GetCustomAttribute<SetUpAttribute>().ShouldNotBeNull();
-                    })
-            );
-
-            Engine.It("should have an NUnit setup method", () =>
+            Engine.It("should have an NUnit tear down method", () =>
                 specBecauseBaseType.GetMethod("TearDown")
                     .ShouldSatisfyAllConditions(x =>
                     {
@@ -169,6 +159,62 @@ namespace SpecBecause.NUnit.Tests
 
             Engine.It($"forwards the call to {nameof(Engine)}", () =>
                 Mocker.GetMock<IEngine>().Verify(x => x.It(expectedAssertionMessage, expectedAssertion), Times.Once));
+        }
+
+        [Test]
+        public void When_calling_Dispose()
+        {
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
+
+            Engine.Because(() => classUnderTest.Dispose());
+
+            var verifyFailed = false;
+            Engine.It($"forwards the call to {nameof(Engine)}", () =>
+            {
+                try
+                {
+                    Mocker.GetMock<IEngine>().Verify(x => x.Dispose(), Times.Once);
+                }
+                catch
+                {
+                    verifyFailed = true;
+                    throw;
+                }
+            });
+
+            // IMPORTANT: Do not place this if statement in an It call
+            if (verifyFailed)
+            {
+                throw new Exception($"{nameof(SpecBecauseBase)}.{nameof(SpecBecauseBase.Dispose)} never called {nameof(Engine)}.{nameof(Engine.Dispose)}.");
+            }
+        }
+
+        [Test]
+        public void When_calling_TearDown()
+        {
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
+
+            Engine.Because(() => classUnderTest.TearDown());
+
+            var verifyFailed = false;
+            Engine.It($"forwards the call to {nameof(Engine)}", () =>
+            {
+                try
+                {
+                    Mocker.GetMock<IEngine>().Verify(x => x.Dispose(), Times.Once);
+                }
+                catch
+                {
+                    verifyFailed = true;
+                    throw;
+                }
+            });
+
+            // IMPORTANT: Do not place this if statement in an It call
+            if (verifyFailed)
+            {
+                throw new Exception($"{nameof(SpecBecauseBase)}.{nameof(SpecBecauseBase.Dispose)} never called {nameof(Engine)}.{nameof(Engine.Dispose)}.");
+            }
         }
 
     }

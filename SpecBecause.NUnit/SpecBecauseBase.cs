@@ -16,7 +16,10 @@ namespace SpecBecause.NUnit
         public void SetUp() { }
 
         [TearDown]
-        public void TearDown() { }
+        public void TearDown()
+        {
+            Dispose();
+        }
 
         public void Because(Action act)
         {
@@ -40,7 +43,7 @@ namespace SpecBecause.NUnit
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            Engine.Dispose();
         }
     }
 }
