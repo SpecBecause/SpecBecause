@@ -157,5 +157,19 @@ namespace SpecBecause.NUnit.Tests
             Engine.It($"returns the result from the forwarded call", () =>
                 exception.ShouldBe(expectedException));
         }
+
+        [Test]
+        public void When_calling_It()
+        {
+            var expectedAssertionMessage = Guid.NewGuid().ToString();
+            Action expectedAssertion = () => { };
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
+
+            Engine.Because(() => classUnderTest.It(expectedAssertionMessage, expectedAssertion));
+
+            Engine.It($"forwards the call to {nameof(Engine)}", () =>
+                Mocker.GetMock<IEngine>().Verify(x => x.It(expectedAssertionMessage, expectedAssertion), Times.Once));
+        }
+
     }
 }

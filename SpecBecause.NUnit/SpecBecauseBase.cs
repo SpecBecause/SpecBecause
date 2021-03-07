@@ -35,7 +35,7 @@ namespace SpecBecause.NUnit
 
         public void It(string assertionMessage, Action assertion)
         {
-            throw new NotImplementedException();
+            Engine.It(assertionMessage, assertion);
         }
 
         public void Dispose()
