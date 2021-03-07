@@ -10,14 +10,14 @@ namespace SpecBecause.NUnit
     {
         private IEngine Engine { get; set; }
 
-        public SpecBecauseBase()
+        public SpecBecauseBase() : this(new Engine())
         {
 
         }
 
-        internal SpecBecauseBase(IEngine engine = null)
+        internal SpecBecauseBase(IEngine engine)
         {
-
+            Engine = engine;
         }
 
         [SetUp]

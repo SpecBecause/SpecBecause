@@ -14,7 +14,7 @@ namespace SpecBecause.NUnit.Tests
         public void Setup()
         {
             Engine = new Engine();
-            ClassUnderTest = new SpecBecauseBase(null);
+            ClassUnderTest = new SpecBecauseBase();
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace SpecBecause.NUnit.Tests
                             {
                                 y.Name.ShouldBe("engine");
                                 y.ParameterType.Name.ShouldBe(nameof(IEngine));
-                                y.DefaultValue.ShouldBeNull();
+                                y.HasDefaultValue.ShouldBeFalse();
                             });
                     });
 
@@ -59,6 +59,39 @@ namespace SpecBecause.NUnit.Tests
                     x.GetParameters().ShouldBeEmpty();
                     x.ReturnType.Name.ShouldBe("Void");
                     x.GetCustomAttribute<TearDownAttribute>().ShouldNotBeNull();
+                });
+        }
+
+        [Test]
+        public void When_constructing_with_defaults()
+        {
+            var defaultClassUnderTest = new SpecBecauseBase();
+
+            typeof(SpecBecauseBase)
+                .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
+                .GetValue(defaultClassUnderTest)
+                .ShouldSatisfyAllConditions(x =>
+                {
+                    x.ShouldNotBeNull();
+                    x.ShouldBeOfType<Engine>();
+                });
+        }
+
+        [Test]
+        public void When_constructing_with_arguments()
+        {
+            var expectedEngine = new Engine();
+
+            var classUnderTest = new SpecBecauseBase(expectedEngine);
+
+            typeof(SpecBecauseBase)
+                .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
+                .GetValue(classUnderTest)
+                .ShouldSatisfyAllConditions(x =>
+                {
+                    x.ShouldNotBeNull();
+                    x.ShouldBeOfType<Engine>();
+                    x.ShouldBeSameAs(expectedEngine);
                 });
         }
     }
