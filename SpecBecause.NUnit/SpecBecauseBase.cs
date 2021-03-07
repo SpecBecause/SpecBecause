@@ -1,8 +1,5 @@
 ﻿using NUnit.Framework;
 using System;
-using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("SpecBecause.NUnit.Tests")]
 
 namespace SpecBecause.NUnit
 {
@@ -10,7 +7,7 @@ namespace SpecBecause.NUnit
     {
         private IEngine Engine { get; set; }
 
-        internal SpecBecauseBase(IEngine engine = null)
+        public SpecBecauseBase(IEngine engine = null)
         {
             Engine = engine ?? new Engine();
         }
@@ -28,12 +25,12 @@ namespace SpecBecause.NUnit
 
         public TResult Because<TResult>(Func<TResult> act)
         {
-            throw new NotImplementedException();
+            return Engine.Because(act);
         }
 
         public TException BecauseThrows<TException>(Action act) where TException : Exception
         {
-            throw new NotImplementedException();
+            return Engine.BecauseThrows<TException>(act);
         }
 
         public void It(string assertionMessage, Action assertion)

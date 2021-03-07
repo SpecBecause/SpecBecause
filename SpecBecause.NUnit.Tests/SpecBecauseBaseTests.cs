@@ -26,59 +26,70 @@ namespace SpecBecause.NUnit.Tests
         {
             var specBecauseBaseType = Engine.Because(() => typeof(SpecBecauseBase));
 
-            specBecauseBaseType.GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.ShouldNotBeNull();
-                    x.Name.ShouldBe(nameof(Engine));
-                    x.PropertyType.Name.ShouldBe(nameof(IEngine));
-                });
-
-            specBecauseBaseType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(IEngine) }, null)
+            Engine.It($"has an {nameof(Engine)} property", () =>
+                specBecauseBaseType.GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)
                     .ShouldSatisfyAllConditions(x =>
                     {
                         x.ShouldNotBeNull();
-                        x.GetParameters().ShouldHaveSingleItem()
-                            .ShouldSatisfyAllConditions(y =>
-                            {
-                                y.Name.ShouldBe("engine");
-                                y.ParameterType.Name.ShouldBe(nameof(IEngine));
-                                y.DefaultValue.ShouldBeNull();
-                            });
-                    });
+                        x.Name.ShouldBe(nameof(Engine));
+                        x.PropertyType.Name.ShouldBe(nameof(IEngine));
+                    })
+            );
 
-            specBecauseBaseType.GetInterface(nameof(IEngine)).ShouldNotBeNull();
+            Engine.It("has a constructor that accepts defaults or overrides", () =>
+                    specBecauseBaseType.GetConstructor(new[] { typeof(IEngine) })
+                        .ShouldSatisfyAllConditions(x =>
+                        {
+                            x.ShouldNotBeNull();
+                            x.GetParameters().ShouldHaveSingleItem()
+                                .ShouldSatisfyAllConditions(y =>
+                                {
+                                    y.Name.ShouldBe("engine");
+                                    y.ParameterType.Name.ShouldBe(nameof(IEngine));
+                                    y.DefaultValue.ShouldBeNull();
+                                });
+                        })
+            );
 
-            specBecauseBaseType.GetMethod("SetUp")
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.GetParameters().ShouldBeEmpty();
-                    x.ReturnType.Name.ShouldBe("Void");
-                    x.GetCustomAttribute<SetUpAttribute>().ShouldNotBeNull();
-                });
+            Engine.It($"implements {nameof(IEngine)}", () =>
+                specBecauseBaseType.GetInterface(nameof(IEngine)).ShouldNotBeNull());
 
-            specBecauseBaseType.GetMethod("TearDown")
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.GetParameters().ShouldBeEmpty();
-                    x.ReturnType.Name.ShouldBe("Void");
-                    x.GetCustomAttribute<TearDownAttribute>().ShouldNotBeNull();
-                });
+            Engine.It("should have an NUnit setup method", () =>
+                specBecauseBaseType.GetMethod("SetUp")
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.GetParameters().ShouldBeEmpty();
+                        x.ReturnType.Name.ShouldBe("Void");
+                        x.GetCustomAttribute<SetUpAttribute>().ShouldNotBeNull();
+                    })
+            );
+
+            Engine.It("should have an NUnit setup method", () =>
+                specBecauseBaseType.GetMethod("TearDown")
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.GetParameters().ShouldBeEmpty();
+                        x.ReturnType.Name.ShouldBe("Void");
+                        x.GetCustomAttribute<TearDownAttribute>().ShouldNotBeNull();
+                    })
+             );
         }
 
         [Test]
         public void When_constructing_with_defaults()
         {
-            var defaultClassUnderTest = new SpecBecauseBase();
+            var classUnderTest = Engine.Because(() => new SpecBecauseBase());
 
-            typeof(SpecBecauseBase)
-                .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
-                .GetValue(defaultClassUnderTest)
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.ShouldNotBeNull();
-                    x.ShouldBeOfType<Engine>();
-                });
+            Engine.It("sets the Engine property to the default value", () =>
+                typeof(SpecBecauseBase)
+                    .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .GetValue(classUnderTest)
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.ShouldNotBeNull();
+                        x.ShouldBeOfType<Engine>();
+                    })
+            );
         }
 
         [Test]
@@ -86,17 +97,19 @@ namespace SpecBecause.NUnit.Tests
         {
             var expectedEngine = new Engine();
 
-            var classUnderTest = new SpecBecauseBase(expectedEngine);
+            var classUnderTest = Engine.Because(() => new SpecBecauseBase(expectedEngine));
 
-            typeof(SpecBecauseBase)
-                .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
-                .GetValue(classUnderTest)
-                .ShouldSatisfyAllConditions(x =>
-                {
-                    x.ShouldNotBeNull();
-                    x.ShouldBeOfType<Engine>();
-                    x.ShouldBeSameAs(expectedEngine);
-                });
+            Engine.It("sets the Engine property to the passed argument", () =>
+                typeof(SpecBecauseBase)
+                    .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .GetValue(classUnderTest)
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.ShouldNotBeNull();
+                        x.ShouldBeOfType<Engine>();
+                        x.ShouldBeSameAs(expectedEngine);
+                    })
+            );
         }
 
         [Test]
@@ -105,9 +118,44 @@ namespace SpecBecause.NUnit.Tests
             Action expectedAct = () => { };
             var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
-            classUnderTest.Because(expectedAct);
+            Engine.Because(() => classUnderTest.Because(expectedAct));
 
-             Mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once);
+            Engine.It($"forwards the call to {nameof(Engine)}", () =>
+                Mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once));
+        }
+
+        [Test]
+        public void When_calling_generic_Because()
+        {
+            int expectedResult = 1;
+            Func<int> expectedAct = () => expectedResult;
+            Mocker.GetMock<IEngine>().Setup(x => x.Because(expectedAct)).Returns(expectedResult);
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
+
+            var result = Engine.Because(() => classUnderTest.Because(expectedAct));
+
+            Engine.It($"forwards the call to {nameof(Engine)}", () =>
+                Mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once));
+
+            Engine.It($"returns the result from the forwarded call", () =>
+                result.ShouldBe(expectedResult));
+        }
+
+        [Test]
+        public void When_calling_BecauseThrows()
+        {
+            Action expectedAct = () => { };
+            var expectedException = new Exception();
+            Mocker.GetMock<IEngine>().Setup(x => x.BecauseThrows<Exception>(expectedAct)).Returns(expectedException);
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
+
+            var exception = Engine.Because(() => classUnderTest.BecauseThrows<Exception>(expectedAct));
+
+            Engine.It($"forwards the call to {nameof(Engine)}", () =>
+                Mocker.GetMock<IEngine>().Verify(x => x.BecauseThrows<Exception>(expectedAct), Times.Once));
+
+            Engine.It($"returns the result from the forwarded call", () =>
+                exception.ShouldBe(expectedException));
         }
     }
 }
