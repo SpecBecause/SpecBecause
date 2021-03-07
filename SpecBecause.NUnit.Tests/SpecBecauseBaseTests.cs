@@ -1,18 +1,22 @@
+using AutoMoqCore;
+using Moq;
 using NUnit.Framework;
 using Shouldly;
-using System.Linq;
+using System;
 using System.Reflection;
 
 namespace SpecBecause.NUnit.Tests
 {
     public class SpecBecauseBaseTests
     {
-        private SpecBecauseBase ClassUnderTest { get; set; }
+        private AutoMoqer Mocker { get; set; }
         private Engine Engine { get; set; }
+        private SpecBecauseBase ClassUnderTest { get; set; }
 
         [SetUp]
         public void Setup()
         {
+            Mocker = new AutoMoqer(new Config());
             Engine = new Engine();
             ClassUnderTest = new SpecBecauseBase();
         }
@@ -39,7 +43,7 @@ namespace SpecBecause.NUnit.Tests
                             {
                                 y.Name.ShouldBe("engine");
                                 y.ParameterType.Name.ShouldBe(nameof(IEngine));
-                                y.HasDefaultValue.ShouldBeFalse();
+                                y.DefaultValue.ShouldBeNull();
                             });
                     });
 
@@ -93,6 +97,17 @@ namespace SpecBecause.NUnit.Tests
                     x.ShouldBeOfType<Engine>();
                     x.ShouldBeSameAs(expectedEngine);
                 });
+        }
+
+        [Test]
+        public void When_calling_void_Because()
+        {
+            Action expectedAct = () => { };
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
+
+            classUnderTest.Because(expectedAct);
+
+             Mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once);
         }
     }
 }

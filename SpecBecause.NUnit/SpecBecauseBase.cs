@@ -10,14 +10,9 @@ namespace SpecBecause.NUnit
     {
         private IEngine Engine { get; set; }
 
-        public SpecBecauseBase() : this(new Engine())
+        internal SpecBecauseBase(IEngine engine = null)
         {
-
-        }
-
-        internal SpecBecauseBase(IEngine engine)
-        {
-            Engine = engine;
+            Engine = engine ?? new Engine();
         }
 
         [SetUp]
@@ -28,7 +23,7 @@ namespace SpecBecause.NUnit
 
         public void Because(Action act)
         {
-            throw new NotImplementedException();
+            Engine.Because(act);
         }
 
         public TResult Because<TResult>(Func<TResult> act)
