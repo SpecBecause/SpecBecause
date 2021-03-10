@@ -84,14 +84,13 @@ namespace SpecBecause.NUnit.Tests
         {
             var classUnderTest = Engine.Because(() => new SpecBecauseBase());
 
-            Engine.It("sets the Engine property to the default value", () =>
+            Engine.It("does not set the Engine property to the default value", () =>
                 typeof(SpecBecauseBase)
                     .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
                     .GetValue(classUnderTest)
                     .ShouldSatisfyAllConditions(x =>
                     {
-                        x.ShouldNotBeNull();
-                        x.ShouldBeOfType<Engine>();
+                        x.ShouldBeNull();
                     })
             );
         }
@@ -112,6 +111,25 @@ namespace SpecBecause.NUnit.Tests
                         x.ShouldNotBeNull();
                         x.ShouldBeOfType<Engine>();
                         x.ShouldBeSameAs(expectedEngine);
+                    })
+            );
+        }
+
+        [Test]
+        public void When_calling_SetUp()
+        {
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
+
+            Engine.Because(() => classUnderTest.SetUp());
+
+            Engine.It("sets the Engine property to the default value", () =>
+                typeof(SpecBecauseBase)
+                    .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .GetValue(classUnderTest)
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.ShouldNotBeNull();
+                        x.ShouldBeOfType<Engine>();
                     })
             );
         }

@@ -9,11 +9,14 @@ namespace SpecBecause.NUnit
 
         public SpecBecauseBase(IEngine engine = null)
         {
-            Engine = engine ?? new Engine();
+            Engine = engine;
         }
 
         [SetUp]
-        public void SetUp() { }
+        public void SetUp()
+        {
+            Engine = new Engine();
+        }
 
         [TearDown]
         public void TearDown()
