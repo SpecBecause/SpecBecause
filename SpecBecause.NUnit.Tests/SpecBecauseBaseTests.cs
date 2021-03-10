@@ -21,6 +21,12 @@ namespace SpecBecause.NUnit.Tests
             ClassUnderTest = new SpecBecauseBase();
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            Engine.Dispose();
+        }
+
         [Test]
         public void When_the_type_SpecBecauseBase_is_loaded()
         {
