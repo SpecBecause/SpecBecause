@@ -11,19 +11,27 @@ namespace SpecBecause.NUnit.Tests
     {
         private AutoMoqer Mocker { get; set; }
         private Engine Engine { get; set; }
-        private SpecBecauseBase ClassUnderTest { get; set; }
+
+        private SpecBecauseBase _classUnderTest;
+        private SpecBecauseBase ClassUnderTest
+        {
+            get
+            {
+                return _classUnderTest ??= Mocker.Create<SpecBecauseBase>();
+            }
+        }
 
         [SetUp]
         public void Setup()
         {
             Mocker = new AutoMoqer(new Config());
             Engine = new Engine();
-            ClassUnderTest = new SpecBecauseBase();
         }
 
         [TearDown]
         public void TearDown()
         {
+            _classUnderTest = null;
             Engine.Dispose();
         }
 
@@ -112,9 +120,8 @@ namespace SpecBecause.NUnit.Tests
         public void When_calling_void_Because()
         {
             Action expectedAct = () => { };
-            var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
-            Engine.Because(() => classUnderTest.Because(expectedAct));
+            Engine.Because(() => ClassUnderTest.Because(expectedAct));
 
             Engine.It($"forwards the call to {nameof(Engine)}", () =>
                 Mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once));
@@ -126,9 +133,8 @@ namespace SpecBecause.NUnit.Tests
             int expectedResult = 1;
             Func<int> expectedAct = () => expectedResult;
             Mocker.GetMock<IEngine>().Setup(x => x.Because(expectedAct)).Returns(expectedResult);
-            var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
-            var result = Engine.Because(() => classUnderTest.Because(expectedAct));
+            var result = Engine.Because(() => ClassUnderTest.Because(expectedAct));
 
             Engine.It($"forwards the call to {nameof(Engine)}", () =>
                 Mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once));
@@ -143,9 +149,8 @@ namespace SpecBecause.NUnit.Tests
             Action expectedAct = () => { };
             var expectedException = new Exception();
             Mocker.GetMock<IEngine>().Setup(x => x.BecauseThrows<Exception>(expectedAct)).Returns(expectedException);
-            var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
-            var exception = Engine.Because(() => classUnderTest.BecauseThrows<Exception>(expectedAct));
+            var exception = Engine.Because(() => ClassUnderTest.BecauseThrows<Exception>(expectedAct));
 
             Engine.It($"forwards the call to {nameof(Engine)}", () =>
                 Mocker.GetMock<IEngine>().Verify(x => x.BecauseThrows<Exception>(expectedAct), Times.Once));
@@ -159,9 +164,8 @@ namespace SpecBecause.NUnit.Tests
         {
             var expectedAssertionMessage = Guid.NewGuid().ToString();
             Action expectedAssertion = () => { };
-            var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
-            Engine.Because(() => classUnderTest.It(expectedAssertionMessage, expectedAssertion));
+            Engine.Because(() => ClassUnderTest.It(expectedAssertionMessage, expectedAssertion));
 
             Engine.It($"forwards the call to {nameof(Engine)}", () =>
                 Mocker.GetMock<IEngine>().Verify(x => x.It(expectedAssertionMessage, expectedAssertion), Times.Once));
@@ -170,9 +174,7 @@ namespace SpecBecause.NUnit.Tests
         [Test]
         public void When_calling_Dispose()
         {
-            var classUnderTest = Mocker.Create<SpecBecauseBase>();
-
-            Engine.Because(() => classUnderTest.Dispose());
+            Engine.Because(() => ClassUnderTest.Dispose());
 
             var verifyFailed = false;
             Engine.It($"forwards the call to {nameof(Engine)}", () =>
@@ -198,9 +200,7 @@ namespace SpecBecause.NUnit.Tests
         [Test]
         public void When_calling_TearDown()
         {
-            var classUnderTest = Mocker.Create<SpecBecauseBase>();
-
-            Engine.Because(() => classUnderTest.TearDown());
+            Engine.Because(() => ClassUnderTest.TearDown());
 
             var verifyFailed = false;
             Engine.It($"forwards the call to {nameof(Engine)}", () =>
