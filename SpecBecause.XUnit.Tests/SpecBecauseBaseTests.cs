@@ -9,11 +9,11 @@ namespace SpecBecause.XUnit.Tests
 {
     public class SpecBecauseBaseTests : SpecBecauseBase
     {
-        private AutoMoqer mocker { get; set; }
+        private AutoMoqer Mocker { get; set; }
 
         public SpecBecauseBaseTests()
         {
-            mocker = new AutoMoqer(new Config());
+            Mocker = new AutoMoqer(new Config());
         }
 
         [Fact]
@@ -91,12 +91,12 @@ namespace SpecBecause.XUnit.Tests
         public void When_calling_void_Because()
         {
             Action expectedAct = () => { };
-            var classUnderTest = mocker.Create<SpecBecauseBase>();
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
             Because(() => classUnderTest.Because(expectedAct));
 
             It($"forwards the call to {nameof(Engine)}", () =>
-                mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once));
+                Mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once));
         }
 
         [Fact]
@@ -104,13 +104,13 @@ namespace SpecBecause.XUnit.Tests
         {
             int expectedResult = 1;
             Func<int> expectedAct = () => expectedResult;
-            mocker.GetMock<IEngine>().Setup(x => x.Because(expectedAct)).Returns(expectedResult);
-            var classUnderTest = mocker.Create<SpecBecauseBase>();
+            Mocker.GetMock<IEngine>().Setup(x => x.Because(expectedAct)).Returns(expectedResult);
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
             var result = Because(() => classUnderTest.Because(expectedAct));
 
             It($"forwards the call to {nameof(Engine)}", () =>
-                mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once));
+                Mocker.GetMock<IEngine>().Verify(x => x.Because(expectedAct), Times.Once));
 
             It($"returns the result from the forwarded call", () =>
                 result.ShouldBe(expectedResult));
@@ -121,13 +121,13 @@ namespace SpecBecause.XUnit.Tests
         {
             Action expectedAct = () => { };
             var expectedException = new Exception();
-            mocker.GetMock<IEngine>().Setup(x => x.BecauseThrows<Exception>(expectedAct)).Returns(expectedException);
-            var classUnderTest = mocker.Create<SpecBecauseBase>();
+            Mocker.GetMock<IEngine>().Setup(x => x.BecauseThrows<Exception>(expectedAct)).Returns(expectedException);
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
             var exception = Because(() => classUnderTest.BecauseThrows<Exception>(expectedAct));
 
             It($"forwards the call to {nameof(Engine)}", () =>
-                mocker.GetMock<IEngine>().Verify(x => x.BecauseThrows<Exception>(expectedAct), Times.Once));
+                Mocker.GetMock<IEngine>().Verify(x => x.BecauseThrows<Exception>(expectedAct), Times.Once));
 
             It($"returns the result from the forwarded call", () =>
                 exception.ShouldBe(expectedException));
@@ -138,18 +138,18 @@ namespace SpecBecause.XUnit.Tests
         {
             var expectedAssertionMessage = Guid.NewGuid().ToString();
             Action expectedAssertion = () => { };
-            var classUnderTest = mocker.Create<SpecBecauseBase>();
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
             Because(() => classUnderTest.It(expectedAssertionMessage, expectedAssertion));
 
             It($"forwards the call to {nameof(Engine)}", () =>
-                mocker.GetMock<IEngine>().Verify(x => x.It(expectedAssertionMessage, expectedAssertion), Times.Once));
+                Mocker.GetMock<IEngine>().Verify(x => x.It(expectedAssertionMessage, expectedAssertion), Times.Once));
         }
 
         [Fact]
         public void When_calling_Dispose()
         {
-            var classUnderTest = mocker.Create<SpecBecauseBase>();
+            var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
             Because(() => classUnderTest.Dispose());
 
@@ -158,7 +158,7 @@ namespace SpecBecause.XUnit.Tests
             {
                 try
                 {
-                    mocker.GetMock<IEngine>().Verify(x => x.Dispose(), Times.Once);
+                    Mocker.GetMock<IEngine>().Verify(x => x.Dispose(), Times.Once);
                 }
                 catch
                 {

@@ -216,6 +216,5 @@ namespace SpecBecause.NUnit.Tests
                 throw new Exception($"{nameof(SpecBecauseBase)}.{nameof(SpecBecauseBase.Dispose)} never called {nameof(Engine)}.{nameof(Engine.Dispose)}.");
             }
         }
-
     }
 }
