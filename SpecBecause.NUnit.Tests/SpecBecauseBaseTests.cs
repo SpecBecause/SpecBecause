@@ -11,27 +11,21 @@ namespace SpecBecause.NUnit.Tests
     {
         private AutoMoqer Mocker { get; set; }
         private Engine Engine { get; set; }
+        private SpecBecauseBase ClassUnderTest { get; set; }
 
-        private SpecBecauseBase _classUnderTest;
-        private SpecBecauseBase ClassUnderTest
-        {
-            get
-            {
-                return _classUnderTest ??= Mocker.Create<SpecBecauseBase>();
-            }
-        }
 
         [SetUp]
         public void Setup()
         {
             Mocker = new AutoMoqer(new Config());
             Engine = new Engine();
+            ClassUnderTest = Mocker.Create<SpecBecauseBase>();
+            ClassUnderTest.SetUp();
         }
 
         [TearDown]
         public void TearDown()
         {
-            _classUnderTest = null;
             Engine.Dispose();
         }
 
@@ -45,21 +39,31 @@ namespace SpecBecause.NUnit.Tests
                     .ShouldSatisfyAllConditions(x =>
                     {
                         x.ShouldNotBeNull();
-                        x.Name.ShouldBe(nameof(Engine));
                         x.PropertyType.Name.ShouldBe(nameof(IEngine));
                     })
             );
 
-            Engine.It("has a constructor that accepts defaults or overrides", () =>
-                    specBecauseBaseType.GetConstructor(new[] { typeof(IEngine) })
+            Engine.It($"has an {nameof(Engine)}Provider property", () =>
+                specBecauseBaseType.GetProperty("EngineProvider", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .ShouldSatisfyAllConditions(x =>
+                    {
+                        x.ShouldNotBeNull();
+                        x.PropertyType.Name.ShouldBe("Func`1");
+                        x.PropertyType.GenericTypeArguments
+                            .ShouldHaveSingleItem()
+                            .Name.ShouldBe(nameof(IEngine));
+                    })
+            );
+
+            Engine.It($"has a constructor that accepts an {nameof(IEngine)} providing function", () =>
+                    specBecauseBaseType.GetConstructor(new[] { typeof(Func<IEngine>) })
                         .ShouldSatisfyAllConditions(x =>
                         {
                             x.ShouldNotBeNull();
                             x.GetParameters().ShouldHaveSingleItem()
                                 .ShouldSatisfyAllConditions(y =>
                                 {
-                                    y.Name.ShouldBe("engine");
-                                    y.ParameterType.Name.ShouldBe(nameof(IEngine));
+                                    y.Name.ShouldBe("engineProvider");
                                     y.DefaultValue.ShouldBeNull();
                                 });
                         })
@@ -88,30 +92,78 @@ namespace SpecBecause.NUnit.Tests
                 typeof(SpecBecauseBase)
                     .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
                     .GetValue(classUnderTest)
-                    .ShouldSatisfyAllConditions(x =>
-                    {
-                        x.ShouldBeNull();
-                    })
+                    .ShouldBeNull()
+            );
+
+            Engine.It("sets the EngineProvider property to the default EngineProvider", () =>
+                typeof(SpecBecauseBase)
+                    .GetProperty("EngineProvider", BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .GetValue(classUnderTest)
+                    .ShouldNotBeNull()
+                    .ShouldBeOfType<Func<IEngine>>()
             );
         }
 
         [Test]
         public void When_constructing_with_arguments()
         {
-            var expectedEngine = new Engine();
+            Func<IEngine> expectedEngineProvider = () => null;
 
-            var classUnderTest = Engine.Because(() => new SpecBecauseBase(expectedEngine));
+            var classUnderTest = Engine.Because(() => new SpecBecauseBase(expectedEngineProvider));
 
-            Engine.It("sets the Engine property to the passed argument", () =>
+            Engine.It("does not set the Engine property to the passed argument", () =>
                 typeof(SpecBecauseBase)
                     .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
                     .GetValue(classUnderTest)
-                    .ShouldSatisfyAllConditions(x =>
-                    {
-                        x.ShouldNotBeNull();
-                        x.ShouldBeOfType<Engine>();
-                        x.ShouldBeSameAs(expectedEngine);
-                    })
+                    .ShouldBeNull()
+            );
+
+            Engine.It("sets the EngineProvider property to the passed argument", () =>
+            {
+                typeof(SpecBecauseBase)
+                    .GetProperty("EngineProvider", BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .GetValue(classUnderTest)
+                    .ShouldNotBeNull()
+                    .ShouldBeSameAs(expectedEngineProvider);
+            });
+        }
+
+        [Test]
+        public void When_calling_default_EngineProvider()
+        {
+            var classUnderTest = new SpecBecauseBase();
+
+            var defaultEngineProvider = (Func<IEngine>)typeof(SpecBecauseBase)
+                .GetProperty("EngineProvider", BindingFlags.NonPublic | BindingFlags.Instance)!
+                .GetValue(classUnderTest);
+
+            var result = Engine.Because(() => defaultEngineProvider());
+
+            Engine.It("returns an Engine", () =>
+                result
+                    .ShouldNotBeNull()
+                    .ShouldBeOfType<Engine>()
+            );
+        }
+
+        [Test]
+        public void When_calling_default_EngineProvider_multiple_times()
+        {
+            var classUnderTest = new SpecBecauseBase();
+
+            var defaultEngineProvider = (Func<IEngine>)typeof(SpecBecauseBase)
+                .GetProperty("EngineProvider", BindingFlags.NonPublic | BindingFlags.Instance)!
+                .GetValue(classUnderTest);
+
+            var (r1, r2) = Engine.Because(() => {
+                var result1 = defaultEngineProvider();
+                var result2 = defaultEngineProvider();
+
+                return (result1, result2);
+            });
+
+            Engine.It("returns a unique Engine instance for each invocation", () =>
+                r1.ShouldNotBeSameAs(r2)
             );
         }
 
@@ -120,18 +172,29 @@ namespace SpecBecause.NUnit.Tests
         {
             var classUnderTest = Mocker.Create<SpecBecauseBase>();
 
+            bool engineProviderWasCalled = false;
+            var expectedEngine = new Engine();
+            Func<IEngine> engineProviderMock = () =>
+            {
+                engineProviderWasCalled = true;
+
+                return expectedEngine;
+            };
+
+            typeof(SpecBecauseBase)
+                .GetProperty("EngineProvider", BindingFlags.NonPublic | BindingFlags.Instance)!
+                .SetValue(classUnderTest, engineProviderMock);
+
             Engine.Because(() => classUnderTest.SetUp());
 
-            Engine.It("sets the Engine property to the default value", () =>
+            Engine.It("sets Engine using EngineProvider", () => {
+                engineProviderWasCalled.ShouldBeTrue();
+
                 typeof(SpecBecauseBase)
                     .GetProperty("Engine", BindingFlags.NonPublic | BindingFlags.Instance)!
                     .GetValue(classUnderTest)
-                    .ShouldSatisfyAllConditions(x =>
-                    {
-                        x.ShouldNotBeNull();
-                        x.ShouldBeOfType<Engine>();
-                    })
-            );
+                    .ShouldBeSameAs(expectedEngine);
+            });
         }
 
         [Test]

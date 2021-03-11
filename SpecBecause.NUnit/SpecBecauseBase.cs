@@ -6,16 +6,17 @@ namespace SpecBecause.NUnit
     public class SpecBecauseBase : IEngine
     {
         private IEngine Engine { get; set; }
+        private Func<IEngine> EngineProvider { get; set; }
 
-        public SpecBecauseBase(IEngine engine = null)
+        public SpecBecauseBase(Func<IEngine> engineProvider = null)
         {
-            Engine = engine;
+            EngineProvider = engineProvider ?? (() => new Engine());
         }
 
         [SetUp]
         public void SetUp()
         {
-            Engine = new Engine();
+            Engine = EngineProvider();
         }
 
         [TearDown]
