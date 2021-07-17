@@ -9,7 +9,7 @@
 
   <PropertyGroup>
     <PackageId>SpecBecause</PackageId>
-    <Version>0.0.1-alpha</Version>
+    <Version>0.0.2-alpha</Version>
     <Authors>Danny Warren, Ben Allred</Authors>
     <Company>SpecBecause</Company>
     <Description>
